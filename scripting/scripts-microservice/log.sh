@@ -1,10 +1,12 @@
 #!/bin/bash
 
 cd
-sudo apt-get upgrade
-sudo apt-get update
+if ! command -v pip3 &>/dev/null; then
+	sudo apt-get upgrade
+	sudo apt-get update
 
-sudo apt install python3-pip
+	sudo apt install -y python3-pip
+fi
 
 cd microservice-app-example/log-message-processor
 

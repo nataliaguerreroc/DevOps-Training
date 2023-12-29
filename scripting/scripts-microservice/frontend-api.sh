@@ -1,11 +1,13 @@
 #!/bin/bash
 
 cd
-sudo apt-get upgrade
 cd microservice-app-example/frontend
-rm -rf node_modules package-lock.json
-sudo apt install npm
 
+if ! command -v npm &>/dev/null; then
+	sudo apt-get upgrade
+	rm -rf node_modules package-lock.json
+	sudo apt install -y npm
+fi
 
 npm install
 npm run build

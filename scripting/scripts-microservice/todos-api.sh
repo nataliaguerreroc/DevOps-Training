@@ -1,8 +1,11 @@
 #!/bin/bash
 
 cd
-sudo apt-get update
-sudo apt install npm
+if ! command -v npm &>/dev/null; then
+	sudo apt-get update
+	sudo apt install -y npm
+fi
+
 cd microservice-app-example/todos-api
 rm -rf node_modules package-lock.json
 
