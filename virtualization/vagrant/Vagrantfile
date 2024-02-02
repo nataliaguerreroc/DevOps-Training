@@ -1,0 +1,67 @@
+Vagrant.configure("2") do |config|
+    config.vm.box = "bento/ubuntu-22.04"
+    config.vm.define "zipkin_vagrant" do |zipkin_vagrant|
+        zipkin_vagrant.vm.provision "shell", path: "zipkin.sh"
+        zipkin_vagrant.vm.network "private_network", ip: "10.0.0.8"
+        zipkin_vagrant.vm.network "forwarded_port", guest: 9411, host: 9411
+        zipkin_vagrant.vm.provider :virtualbox do |vb|
+            vb.customize [ 'modifyvm', :id, '--name', 'zipkin', '--cpus', '1', '--memory', '720',
+            '--cpuexecutioncap', '80' ]
+        end
+    end
+    config.vm.define "users_api_vagrant" do |users_api_vagrant|
+        users_api_vagrant.vm.provision "shell", path: "usersapi.sh"
+        users_api_vagrant.vm.network "private_network", ip: "10.0.0.7"
+        users_api_vagrant.vm.network "forwarded_port", guest: 6379, host: 6379
+        users_api_vagrant.vm.provider :virtualbox do |vb|
+            vb.customize [ 'modifyvm', :id, '--name', 'users', '--cpus', '1', '--memory', '720',
+            '--cpuexecutioncap', '80' ]
+        end
+    end
+    config.vm.define "auth_api_vagrant" do |auth_api_vagrant|
+        auth_api_vagrant.vm.provision "shell", path: "authapi.sh"
+        auth_api_vagrant.vm.network "forwarded_port", guest: 8000, host: 8000
+        auth_api_vagrant.vm.network "private_network", ip: "10.0.0.2"
+        auth_api_vagrant.vm.provider :virtualbox do |vb|
+            vb.customize [ 'modifyvm', :id, '--name', 'auth', '--cpus', '1', '--memory', '720',
+            '--cpuexecutioncap', '80' ]
+        end
+    end
+    config.vm.define "redis_vagrant" do |redis_vagrant|
+        redis_vagrant.vm.provision "shell", path: "redisvag.sh"
+        redis_vagrant.vm.network "forwarded_port", guest: 6377, host: 6377
+        redis_vagrant.vm.network "private_network", ip: "10.0.0.3"
+        redis_vagrant.vm.provider :virtualbox do |vb|
+            vb.customize [ 'modifyvm', :id, '--name', 'redis', '--cpus', '1', '--memory', '720',
+            '--cpuexecutioncap', '80' ]
+        end
+    end
+    config.vm.define "todos_api_vagrant" do |todos_api_vagrant|
+        todos_api_vagrant.vm.provision "shell", path: "todosapi.sh"
+        todos_api_vagrant.vm.network "forwarded_port",  guest: 8082, host: 8082
+        todos_api_vagrant.vm.network "private_network", ip: "10.0.0.4"
+        todos_api_vagrant.vm.provider :virtualbox do |vb|
+            vb.customize [ 'modifyvm', :id, '--name', 'todos', '--cpus', '1', '--memory', '720',
+            '--cpuexecutioncap', '80' ]
+        end
+    end
+    config.vm.define "log_api_vagrant" do |log_api_vagrant|
+        log_api_vagrant.vm.provision "shell", path: "logapi.sh"
+        log_api_vagrant.vm.network "private_network", ip: "10.0.0.5"
+        log_api_vagrant.vm.network "forwarded_port", guest: 6377, host: 6376
+        log_api_vagrant.vm.provider :virtualbox do |vb|
+            vb.customize [ 'modifyvm', :id, '--name', 'logvag', '--cpus', '1', '--memory', '720',
+            '--cpuexecutioncap', '80' ]
+        end
+    end
+    config.vm.define "frontend_api_vagrant" do |frontend_api_vagrant|
+        frontend_api_vagrant.vm.provision "shell", path: "frontendapi.sh"
+        frontend_api_vagrant.vm.network "forwarded_port", guest: 8080, host: 1234
+        frontend_api_vagrant.vm.network "private_network", ip: "10.0.0.6"
+        frontend_api_vagrant.vm.provider :virtualbox do |vb|
+            vb.customize [ 'modifyvm', :id, '--name', 'frontendvag', '--cpus', '1', '--memory', '720',
+            '--cpuexecutioncap', '80' ]
+        end
+    end
+
+end
