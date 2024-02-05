@@ -13,7 +13,7 @@ else
 fi
 
 cd microservice-app-example/frontend
-rm -rf node_modules package-lock.json
+sudo rm -rf node_modules package-lock.json
 
 if ! command -v npm &>/dev/null; then
 	echo "npm doesnt exist"
