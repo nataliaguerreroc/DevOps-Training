@@ -1,0 +1,107 @@
+version: '3.7'
+
+services:
+  zipkin:
+    build: ./zipkin
+    networks:
+      my_network:
+        ipv4_address: 10.0.0.2
+    ports:
+      - "9411:9411"
+
+  redis:
+    build: ./redis
+    networks:
+      my_network:
+        ipv4_address: 10.0.0.3
+    ports:
+      - "6379:6379"
+
+  users:
+    env_file:
+      - ./users-api/.env2
+    build: ./users-api
+    networks:
+      my_network:
+        ipv4_address: 10.0.0.4
+    environment:
+      - SPRING_ZIPKIN_BASE_URL=http://zipkin:9411
+    ports:
+      - "8083:8083"
+    depends_on:
+      - zipkin
+
+  auth:
+    env_file:
+      - ./auth-api/.env1
+    build: ./auth-api
+    networks:
+      my_network:
+        ipv4_address: 10.0.0.5
+    environment:
+      - USERS_API_ADDRESS=http://users:8083
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+    ports:
+      - "8000:8000"
+    depends_on:
+      - zipkin
+
+  todos:
+    env_file:
+      - ./todos-api/.env4
+    build: ./todos-api
+    networks:
+      my_network:
+        ipv4_address: 10.0.0.6
+    environment:
+      - REDIS_HOST=redis
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+    ports:
+      - "8082:8082"
+    depends_on:
+      - zipkin
+      - redis
+
+  log:
+    env_file:
+      - ./log-message-processor/.env3
+    build: ./log-message-processor
+    networks:
+      my_network:
+        ipv4_address: 10.0.0.7
+    environment:
+      - REDIS_HOST=redis
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+    ports:
+      - "6376:6376"
+    depends_on:
+      - zipkin
+      - redis
+
+  frontend:
+    env_file:
+      - ./frontend/.env5
+    build: ./frontend
+    networks:
+      my_network:
+        ipv4_address: 10.0.0.8
+    environment:
+      - AUTH_API_ADDRESS=http://auth:8000
+      - TODOS_API_ADDRESS=http://todos:8082
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+    ports:
+      - "8080:8080"
+    depends_on:
+      - zipkin
+      - redis
+      - auth
+      - users
+      - todos
+      - log
+
+networks:
+  my_network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.0.0/24
